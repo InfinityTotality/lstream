@@ -5,6 +5,7 @@ twitch_limit=100
 debuglevel=0
 player="mpv"
 cacheopts="-cache 8192 -cache-min 4"
+streamlist="~/.streamlist"
 
 print_help () {
 	callname=`basename "$0"`
@@ -29,7 +30,7 @@ print_help () {
 	Combining options in a single argument (golfing) is not currently supported.
 
 	-c
-	  Run the player and options specified in the nocache entry in .lstreamrc.
+	  Run the player with no cache.
 
 	-q quality
 	  Use the specified quality for the stream. (use -l for a list of available qualities)
@@ -82,12 +83,12 @@ find_stream () {
 	# search list of saved stream urls if nocache is not specified (by -a or -s)
 	if [ ! $nocache ]
 	then
-		local cached=`grep "^$1 " ~/.streamlist`
+		local cached=`grep "^$1 " "$streamlist"`
 	fi
 	# if a match is found, save as stream and return
 	if [ ! -z "$cached" ]
 	then
-		stream=`echo "$cached" | awk '{print $2}'`
+		stream=`echo "$cached" | cut -d' ' -f2`
 		return 0
 	fi
 
@@ -244,14 +245,17 @@ do
 				get_stream "$1"
 			fi
 
+			# add entry to .streamlist if -s is specified
 			if [ $save ]
 			then
-				if grep -q "^$entry " ~/.streamlist
+				# check if entry exists and replace if so
+				if grep -q "^$entry " "$streamlist"
 				then
-					sed -i "s|^$entry .*$|$entry $stream|" ~/.streamlist
+					sed -i "s|^$entry .*$|$entry $stream|" "$streamlist"
 					echo "Entry exists, updating"
+				# add new entry otherwise
 				else
-					echo "$entry $stream" >> ~/.streamlist
+					echo "$entry $stream" >> "$streamlist"
 					echo "Adding entry: $entry $stream"
 				fi
 			fi
