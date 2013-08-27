@@ -5,7 +5,7 @@ twitch_limit=100
 debuglevel=0
 player="mpv"
 cacheopts="-cache 8192 -cache-min 4"
-streamlist="~/.streamlist"
+streamlist="$HOME/.streamlist"
 
 print_help () {
 	callname=`basename "$0"`
@@ -81,6 +81,7 @@ find_stream () {
 	twitch_results=0
 
 	# search list of saved stream urls if nocache is not specified (by -a or -s)
+	debug 1 "searching stream list for query"
 	if [ ! $nocache ]
 	then
 		local cached=`grep "^$1 " "$streamlist"`
@@ -88,12 +89,13 @@ find_stream () {
 	# if a match is found, save as stream and return
 	if [ ! -z "$cached" ]
 	then
+		debug 1 "saved stream found"
 		stream=`echo "$cached" | cut -d' ' -f2`
 		return 0
 	fi
 
+	debug 1 "no saved streams found, searching twitch"
 	debug 1 "query: $1"
-
 	debug 1 "twitch limit: $twitch_limit"
 
 	# fetch json stream list from REST API
