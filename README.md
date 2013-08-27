@@ -5,8 +5,12 @@ A wrapper for livestreamer on twitch.tv. Supports pseudo searching by fetching t
 names and descriptions of the top 100 streams on twitch and searching the full text.
 Also supports saving streams under arbitrary names.
 
+Usage: 
+-----
+lstream.sh [options] [function] <query>
 
-Functions:  
+Functions:
+---------
 These functions are exclusive and only one can be used per call. If multiple are
 specified, the script will exit after the first one is enountered and run. Any
 argument immediately following a function will be treated as the query.
@@ -20,7 +24,8 @@ argument immediately following a function will be treated as the query.
 -h  
   Print this help.
 
-Options:  
+Options:
+-------
 Combining options in a single argument (golfing) is not currently supported.
 
 -c  
