@@ -15,6 +15,8 @@ Depends on:
 - curl
 - sed
 - grep
+- cut
+- paste
 
 Usage: 
 -----
@@ -40,7 +42,7 @@ Options:
 Combining options in a single argument (golfing) is not currently supported.
 
 -c  
-  Run the player and options specified in the nocache entry in .lstreamrc.
+  Run the player with no cache.
 
 -q quality  
   Use the specified quality for the stream. (use -l for a list of available qualities)
