@@ -7,7 +7,7 @@ Also supports saving streams under arbitrary names.
 
 Usage: 
 -----
-lstream.sh [options] [function] <query>
+lstream.sh [options] [function] \<query\>
 
 Functions:
 ---------
@@ -44,7 +44,7 @@ Combining options in a single argument (golfing) is not currently supported.
   Player specification. Will use the following single argument as the player string.
 
 -e  
-  Will use the query as the exact stream name, i.e. twitch.tv/<query>
+  Will use the query as the exact stream name, i.e. twitch.tv/\<query\>
 
 -s entry  
   Save the stream url under the name supplied in the following argument.
