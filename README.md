@@ -4,10 +4,10 @@ lstream
 A twitch.tv wrapper for livestreamer written in bash. Supports searching the
 names and descriptions of the top 100 streams on twitch as well as saving streams
 under arbitrary names. Automatically selects best quality if none is specified.
-Currently hard coded to play via mpv, but may support a configuration file in the future.
-For now, simply edit the player= line to specify another player which can read from stdin.
-The cacheopts will work with mplayer/mplayer2/mpv. If using another, modify it to be appropriate
-or remove it.
+Currently hard coded to play via mpv if -o is not used, but may support a configuration
+file in the future. For now, simply edit the player= line to specify another player which
+can read from stdin. The cacheopts will work with mplayer/mplayer2/mpv. If using another,
+modify it to be appropriate or remove it.
 
 Depends on:  
 - livestreamer
