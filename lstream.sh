@@ -3,7 +3,8 @@
 # API stream list seems to only support returning 100 at a time, and this seems sufficient for popular streams
 twitch_limit=100
 debuglevel=0
-player="mpv -cache 8192 -cache-min 4"
+player="mpv"
+cacheopts="-cache 8192 -cache-min 4"
 
 print_help () {
 	callname=`basename "$0"`
@@ -74,6 +75,7 @@ debug () {
 	fi
 }
 
+# do the work of procuring stream url given the query
 find_stream () {
 	twitch_results=0
 
@@ -82,6 +84,7 @@ find_stream () {
 	then
 		local cached=`grep "^$1 " ~/.streamlist`
 	fi
+	# if a match is found, save as stream and return
 	if [ ! -z "$cached" ]
 	then
 		stream=`echo "$cached" | awk '{print $2}'`
@@ -97,7 +100,7 @@ find_stream () {
 	#debug 3 "twitch raw:"
 	#debug 3 "$twitch_raw"
 	
-	# Parse json into list of stream names and descriptions
+	# parse json into list of stream names and descriptions
 	local twitch_list=`echo "$twitch_raw" | jshon -e streams -a -e channel -e name -u -p -e status | paste -s -d '\t\n'`
 	debug 3 "twitch list:"
 	debug 3 "$twitch_list"
@@ -109,21 +112,25 @@ find_stream () {
 		debug 1 "$twitch_matches"
 		twitch_results=`echo "$twitch_matches" | wc -l`
 
+		# count beginning with 1 so array indices coincide with user choice entry
 		local i=1
 		# process each matching line found, putting the stream names and urls into arrays to present to user
 		while read line
 		do
 			debug 1 "current processing line: $line"
+			# take json element index from line numbers added by grep above, offset by 1
 			let index=$(echo "$line" | cut -d: -f1)-1
 			debug 1 "result index: $index"
+			# fetch stream display name to present to user and stream url for matches
 			twitch_names[$i]=`echo "$twitch_raw" | jshon -e streams -e $index -e channel -e display_name -u`
 			twitch_urls[$i]=`echo "$twitch_raw" | jshon -e streams -e $index -e channel -e url -u`
 			debug 1 "entry $i name: ${twitch_names[$i]}"
 			debug 1 "entry $i url: ${twitch_urls[$i]}"
-			$if [ "${twitch_names[$i]}" = "$1" ]
 			let i++
 		done <<< "$twitch_matches"
 	else
+		# set results for twitch to 0 if grep has nonzero exit status
+		# to support searching multiple services in the future (and the past, RIP own3d)
 		twitch_results=0
 		debug 2 "no results, exiting find_stream"
 		return 1
@@ -139,8 +146,8 @@ find_stream () {
 	debug 2 "exiting find_stream"
 }
 
+# present results to user and read selection
 print_results () {
-	# present results to user and read selection
 	debug 2 "starting print_results"
 	local count=1
 	debug 1 "twitch results: $twitch_results"
@@ -166,6 +173,7 @@ print_results () {
 	fi
 }
 
+# handle making sure a stream is found if there is one to be found
 get_stream () {
 	if find_stream "$1"
 	then
@@ -199,10 +207,11 @@ do
 			exact=true
 			shift ;;
 		-c)
-			player="mpv"
+			noplayercache=true
 			shift ;;
 		-o)
 			player="$2"
+			noplayercache=true
 			shift 2 ;;
 		-q)
 			quality="$2"
@@ -247,7 +256,12 @@ do
 				fi
 			fi
 
-			livestreamer -p "$player" -v "$stream" ${quality:-best}
+			if [ $noplayercache ]
+			then
+				livestreamer -p "$player" -v "$stream" ${quality:-best}
+			else
+				livestreamer -p "$player $cacheopts" -v "$stream" ${quality:-best}
+			fi
 			break ;;
 	esac
 done
