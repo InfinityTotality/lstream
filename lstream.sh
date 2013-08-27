@@ -1,7 +1,8 @@
 #!/bin/bash
 
-debuglevel=0
+# API stream list seems to only support returning 100 at a time, and this seems sufficient for popular streams
 twitch_limit=100
+debuglevel=0
 player="mpv -cache 8192 -cache-min 4"
 
 print_help () {
@@ -50,7 +51,9 @@ print_help () {
 	  the entry may be omitted, and the stream will be saved under the query instead."
 }
 
+# function to print debug messages if script is run with specified debug level (-v/vv/vvv)
 debug () {
+	# save exit status of previous command
 	exit=$?
 	if [ "$1" -gt $debuglevel ]
 	then
@@ -58,9 +61,11 @@ debug () {
 	fi
 	level="$1"
 	shift
+	# print empty line if debug level is reached but no debug message
 	if [ -z "$1" ]
 	then
 		echo
+	# support reading from stdin with argument -
 	elif [ "$1" = - ]
 	then
 		sed "s|^|[$exit]($level): |" | cat -
@@ -83,24 +88,21 @@ find_stream () {
 		return 0
 	fi
 
-	#simply use query as twitch name for non-functional search
-	#twitch_results=1
-	#twitch_urls[1]="http://www.twitch.tv/$1"
-
-	#local query=`echo "$1" | sed 's| |%20|g'`
-
 	debug 1 "query: $1"
 
 	debug 1 "twitch limit: $twitch_limit"
 
+	# fetch json stream list from REST API
 	local twitch_raw=`curl -s https://api.twitch.tv/kraken/streams?limit=$twitch_limit`
 	#debug 3 "twitch raw:"
 	#debug 3 "$twitch_raw"
 	
+	# Parse json into list of stream names and descriptions
 	local twitch_list=`echo "$twitch_raw" | jshon -e streams -a -e channel -e name -u -p -e status | paste -s -d '\t\n'`
 	debug 3 "twitch list:"
 	debug 3 "$twitch_list"
 
+	# search parsed list for query with grep and process if any matches
 	if twitch_matches=`echo "$twitch_list" | grep -in "$1"`
 	then
 		debug 1 "twitch matches:"
@@ -108,6 +110,7 @@ find_stream () {
 		twitch_results=`echo "$twitch_matches" | wc -l`
 
 		local i=1
+		# process each matching line found, putting the stream names and urls into arrays to present to user
 		while read line
 		do
 			debug 1 "current processing line: $line"
@@ -126,7 +129,7 @@ find_stream () {
 		return 1
 	fi
 
-
+	# if only 1 result, save it as the stream to play
 	if [ $twitch_results -eq 1 ]
 	then
 		stream=${twitch_urls[1]}
@@ -137,6 +140,7 @@ find_stream () {
 }
 
 print_results () {
+	# present results to user and read selection
 	debug 2 "starting print_results"
 	local count=1
 	debug 1 "twitch results: $twitch_results"
