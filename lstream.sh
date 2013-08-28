@@ -107,14 +107,14 @@ find_stream () {
 	debug 1 "searching stream list for query"
 	if [ ! $nocache ]
 	then
-		local cached=`grep "^$1|" "$streamlist"`
-	fi
-	# if a match is found, save as stream and return
-	if [ ! -z "$cached" ]
-	then
-		debug 1 "saved stream found"
-		stream=`echo "$cached" | cut -d'|' -f2`
-		return 0
+		local cached
+		# if a match is found, save as stream and return
+		if cached=`grep "^$1|" "$streamlist"`
+		then
+			debug 1 "saved stream found"
+			stream=`echo "$cached" | cut -d'|' -f2`
+			return 0
+		fi
 	fi
 
 	debug 1 "no saved streams found, searching twitch"
@@ -123,11 +123,13 @@ find_stream () {
 
 	# fetch json stream list from REST API
 	local twitch_raw=`curl -s https://api.twitch.tv/kraken/streams?limit=$twitch_limit`
+	debug 2 "twitch raw fetched"
 	#debug 3 "twitch raw:"
 	#debug 3 "$twitch_raw"
 	
 	# parse json into list of stream names and descriptions
 	local twitch_list=`echo "$twitch_raw" | jshon -e streams -a -e channel -e name -u -p -e status | paste -s -d '\t\n'`
+	debug 2 "twitch raw parsed"
 	debug 3 "twitch list:"
 	debug 3 "$twitch_list"
 
