@@ -84,13 +84,13 @@ find_stream () {
 	debug 1 "searching stream list for query"
 	if [ ! $nocache ]
 	then
-		local cached=`grep "^$1 " "$streamlist"`
+		local cached=`grep "^$1|" "$streamlist"`
 	fi
 	# if a match is found, save as stream and return
 	if [ ! -z "$cached" ]
 	then
 		debug 1 "saved stream found"
-		stream=`echo "$cached" | cut -d' ' -f2`
+		stream=`echo "$cached" | cut -d'|' -f2`
 		return 0
 	fi
 
@@ -165,6 +165,7 @@ print_results () {
 	fi
 	echo -n "Enter your selection: "
 	read choice
+	# make sure choice is 1 or more digits, exit otherwise
 	if [[ ! "$choice" =~ [0-9]+ ]] 
 	then
 		exit 0
@@ -178,8 +179,10 @@ print_results () {
 
 # handle making sure a stream is found if there is one to be found
 get_stream () {
+	# if find stream returns success, one or more streams was found
 	if find_stream "$1"
 	then
+		# if stream is not set yet, more than 1 result was found
 		if [ -z "$stream" ]
 		then
 			print_results
@@ -193,6 +196,7 @@ get_stream () {
 while [ ! -z "$1" ]
 do
 	case "$1" in
+		# debug options
 		-v)
 			debuglevel=1
 			shift ;;
@@ -202,6 +206,7 @@ do
 		-vvv)
 			debuglevel=3
 			shift ;;
+		# options
 		-a)
 			all=true
 			nocache=true
@@ -228,6 +233,7 @@ do
 			then
 				shift 1
 			fi ;;
+		# functions
 		-p)
 			get_stream "$2"
 			echo $stream
@@ -239,6 +245,7 @@ do
 		-h)
 			print_help 
 			break ;;
+		# handle query
 		*)
 			if [ $exact ]
 			then
@@ -247,17 +254,17 @@ do
 				get_stream "$1"
 			fi
 
-			# add entry to .streamlist if -s is specified
+			# add entry to stream list if -s is specified
 			if [ $save ]
 			then
 				# check if entry exists and replace if so
-				if grep -q "^$entry " "$streamlist"
+				if grep -q "^$entry|" "$streamlist"
 				then
-					sed -i "s|^$entry .*$|$entry $stream|" "$streamlist"
+					sed -i "s|^$entry\|.*$|$entry\|$stream|" "$streamlist"
 					echo "Entry exists, updating"
 				# add new entry otherwise
 				else
-					echo "$entry $stream" >> "$streamlist"
+					echo "$entry|$stream" >> "$streamlist"
 					echo "Adding entry: $entry $stream"
 				fi
 			fi
