@@ -3,13 +3,36 @@
 # API stream list seems to only support returning 100 at a time, and this seems sufficient for popular streams
 twitch_limit=100
 debuglevel=0
+configfile="$HOME/.lstreamrc"
+
+# set defaults for config options in case they are omitted from config
 player="mpv"
 cacheopts="-cache 8192 -cache-min 4"
+quality=best
 streamlist="$HOME/.streamlist"
+
+write_config () {
+	echo '# configuration options
+# player to use for streams. command line arguments may be included here
+player="mpv"
+
+# command line options which will (or will not) be passed to the player
+# depending on whether or not -c was used
+cacheopts="-cache 8192 -cache-min 4"
+
+# default quality for streams. twitch currently provides the following qualities (case sensitive):
+# High, Low, Medium, Source, mobile_high, mobile_low, mobile_medium
+# best and worst are aliases for the best and worst qualities, usually mobile_high and mobile_low
+# use the -l option for a current list for any given stream
+quality=best
+
+# location of the saved stream list
+streamlist="$HOME/.streamlist"' > "$configfile"
+}
 
 print_help () {
 	callname=`basename "$0"`
-	echo "Usage: 
+	echo "        Usage: 
 	$callname [options] [function] <query>
 
 	Functions:
@@ -195,6 +218,13 @@ get_stream () {
 	fi
 }
 
+if [ -e "$configfile" ]
+then
+	. "$configfile"
+else
+	write_config
+fi
+
 while [ ! -z "$1" ]
 do
 	case "$1" in
@@ -273,9 +303,9 @@ do
 
 			if [ $noplayercache ]
 			then
-				livestreamer -p "$player" -v "$stream" ${quality:-best}
+				livestreamer -p "$player" -v "$stream" "$quality"
 			else
-				livestreamer -p "$player $cacheopts" -v "$stream" ${quality:-best}
+				livestreamer -p "$player $cacheopts" -v "$stream" "$quality"
 			fi
 			break ;;
 	esac
