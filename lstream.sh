@@ -108,6 +108,7 @@ find_stream () {
 	debug 3 "twitch list:"
 	debug 3 "$twitch_list"
 
+	local twitch_matches
 	# search parsed list for query with grep, adding line numbers to results, and process if any matches
 	if twitch_matches=`echo "$twitch_list" | grep -in "$1"`
 	then
@@ -121,14 +122,15 @@ find_stream () {
 		while read line
 		do
 			debug 2 "current processing line: $line"
+			local index
 			# take json element index from line numbers added by grep above, offset by 1
 			let index=$(echo "$line" | cut -d: -f1)-1
 			debug 2 "result index: $index"
 			# fetch stream display name to present to user and stream url for matches
 			twitch_names[$i]=`echo "$twitch_raw" | jshon -e streams -e $index -e channel -e display_name -u`
 			twitch_urls[$i]=`echo "$twitch_raw" | jshon -e streams -e $index -e channel -e url -u`
-			debug 1 "entry $i name: ${twitch_names[$i]}"
-			debug 1 "entry $i url: ${twitch_urls[$i]}"
+			debug 1 "result $i name: ${twitch_names[$i]}"
+			debug 1 "result $i url: ${twitch_urls[$i]}"
 			let i++
 		done <<< "$twitch_matches"
 	else
