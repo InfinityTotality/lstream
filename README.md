@@ -51,7 +51,7 @@ Combining options in a single argument (golfing) is not currently supported.
   Verbosity. Run with specified level of extra debug output.
 
 -a  
-  Ignore saved streams and searches for the query normally.
+  Ignore saved streams and search for the query normally.
 
 -o player  
   Player specification. Will use the following single argument as the player string.
