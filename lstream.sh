@@ -63,7 +63,7 @@ debug () {
 	fi
 	level="$1"
 	shift
-	# print empty line if debug level is reached but no debug message
+	# print empty line if debug level is reached (or no debug level) but no debug message
 	if [ -z "$1" ]
 	then
 		echo
@@ -76,7 +76,7 @@ debug () {
 	fi
 }
 
-# do the work of procuring stream url given the query
+# do the work of procuring stream url(s) given the query
 find_stream () {
 	twitch_results=0
 
@@ -108,11 +108,11 @@ find_stream () {
 	debug 3 "twitch list:"
 	debug 3 "$twitch_list"
 
-	# search parsed list for query with grep and process if any matches
+	# search parsed list for query with grep, adding line numbers to results, and process if any matches
 	if twitch_matches=`echo "$twitch_list" | grep -in "$1"`
 	then
-		debug 1 "twitch matches:"
-		debug 1 "$twitch_matches"
+		debug 2 "twitch matches:"
+		debug 2 "$twitch_matches"
 		twitch_results=`echo "$twitch_matches" | wc -l`
 
 		# count beginning with 1 so array indices coincide with user choice entry
@@ -120,10 +120,10 @@ find_stream () {
 		# process each matching line found, putting the stream names and urls into arrays to present to user
 		while read line
 		do
-			debug 1 "current processing line: $line"
+			debug 2 "current processing line: $line"
 			# take json element index from line numbers added by grep above, offset by 1
 			let index=$(echo "$line" | cut -d: -f1)-1
-			debug 1 "result index: $index"
+			debug 2 "result index: $index"
 			# fetch stream display name to present to user and stream url for matches
 			twitch_names[$i]=`echo "$twitch_raw" | jshon -e streams -e $index -e channel -e display_name -u`
 			twitch_urls[$i]=`echo "$twitch_raw" | jshon -e streams -e $index -e channel -e url -u`
