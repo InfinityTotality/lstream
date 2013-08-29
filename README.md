@@ -57,5 +57,5 @@ Options
 
 -s entry  
   Save the stream url under the name supplied in the following argument.
-  This option may be used immediately before the search query, in which case 
-  the entry may be omitted, and the stream will be saved under the query instead.
+  The query may be omitted when using this option, in which case entry
+  will be used instead.

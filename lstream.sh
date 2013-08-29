@@ -2,6 +2,10 @@
 
 # API stream list seems to only support returning 100 at a time, and this seems sufficient for popular streams
 twitch_limit=100
+save=false
+exact=false
+nocache=false
+noplayercache=false
 debuglevel=0
 configfile="$HOME/.lstreamrc"
 
@@ -71,8 +75,8 @@ print_help () {
 
     -s entry
      Save the stream url under the name supplied in the following argument.
-     This option may be used immediately before the search query, in which case 
-     the entry may be omitted, and the stream will be saved under the query instead."
+     The query may be omitted when using this option, in which case entry
+     will be used instead."
 }
 
 # function to print debug messages if script is run with specified debug level (-v/vv/vvv)
@@ -103,7 +107,7 @@ find_stream () {
     twitch_results=0
 
     # search list of saved stream urls if nocache is not specified (by -a or -s)
-    if [ ! $nocache ]
+    if ! $nocache
     then
         debug 1 "searching stream list for query"
         local cached
@@ -232,7 +236,6 @@ do
     case "$OPTION" in
         # options
         a)
-            all=true
             nocache=true ;;
         c)
             noplayercache=true ;;
@@ -261,8 +264,13 @@ do
             get_stream "$OPTARG"
             echo $stream
             break ;;
+        ?)
+            print_help
+            exit 2 ;;
     esac
 done
+
+debug 2 "options parsed"
 
 shift $((OPTIND - 1))
 # use the argument to -s in case query is omitted
@@ -274,7 +282,7 @@ else
 fi
 
 # handle query
-if [ $exact ]
+if $exact
 then
     stream="http://www.twitch.tv/$query"
 else
@@ -282,7 +290,7 @@ else
 fi
 
 # add entry to stream list if -s is specified
-if [ $save ]
+if $save
 then
     # check if entry exists and replace if so
     if grep -q "^$entry|" "$streamlist"
@@ -296,10 +304,7 @@ then
     fi
 fi
 
-if [ $noplayercache ]
-then
-    playerstring="$player"
-else
-    playerstring="$player $cacheopts"
-fi
-livestreamer -p "$playerstring" -v "$stream" "$quality"
+# append cache options if -c is not used
+$noplayercache || player+=" $cacheopts"
+
+livestreamer -p "$player" -v "$stream" "$quality"
