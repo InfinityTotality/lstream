@@ -45,39 +45,42 @@ print_help () {
     specified, the script will exit after the first one is enountered and run. Any
     argument immediately following a function will be treated as the query.
     
-    -p
-     Print the stream url which would normally be passed to livestreamer.
+        -d entry
+          Delete stream saved under name \"entry\"
 
-    -l
-     List the available stream qualities for the selected stream.
+        -h
+          Print this help
 
-    -h
-     Print this help.
+        -l
+          List the available stream qualities for the selected stream
+
+        -p
+          Print the stream url which would normally be passed to livestreamer
 
     Options:
 
-    -c
-     Run the player with no cache.
+        -a
+          Ignore saved streams and search for the query normally
 
-    -q quality
-     Use the specified quality for the stream. (use -l for a list of available qualities)
-    
-    -v / -vv / -vvv
-     Verbosity. Run with specified level of extra debug output.
+        -c
+          Run the player without the cache options specified in ~/.lstreamrc
 
-    -a
-     Ignore saved streams and search for the query normally.
+        -e
+          Will use the query as the exact stream name, i.e. twitch.tv/<query>
 
-    -o player
-     Player specification. Will use the following single argument as the player string.
+        -o player
+          Player specification. Will use the following single argument as the player string
 
-    -e
-     Will use the query as the exact stream name, i.e. twitch.tv/<query>
+        -q quality
+          Use the specified quality for the stream. (use -l for a list of available qualities)
+        
+        -s entry
+          Save the stream url under the name supplied in the following argument.
+          The query may be omitted when using this option, in which case \"entry\"
+          will be used instead
 
-    -s entry
-     Save the stream url under the name supplied in the following argument.
-     The query may be omitted when using this option, in which case entry
-     will be used instead."
+        -v / -vv / -vvv
+          Run with specified level of extra debug output"
 }
 
 # function to print debug messages if script is run with specified debug level (-v/vv/vvv)
@@ -232,7 +235,7 @@ else
     write_config
 fi
 
-while getopts 'aceh:l:o:p:q:s:v' OPTION
+while getopts 'acd:eh:l:o:p:q:s:v' OPTION
 do
     case "$OPTION" in
         # options
@@ -254,17 +257,27 @@ do
         v)
             let debuglevel+=1 ;;
         # functions
+        d)
+            if grep -q "^$OPTARG|.*" "$streamlist"
+            then
+                sed -i "/^$OPTARG|.*/d" "$streamlist"
+                echo "Entry deleted"
+                exit 0
+            else
+                echo "No entry \"$OPTARG\" found"
+                exit 1
+            fi ;;
         h)
             print_help 
-            break ;;
+            exit 0 ;;
         l)
             get_stream "$OPTARG"
-            livestreamer $stream
-            break ;;
+            livestreamer "$stream"
+            exit ;;
         p)
             get_stream "$OPTARG"
-            echo $stream
-            break ;;
+            echo "$stream"
+            exit 0 ;;
         ?)
             print_help
             exit 2 ;;
