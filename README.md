@@ -16,11 +16,11 @@ Depends on:
 - cut
 - paste
 
-Usage: 
+Usage
 -----
 lstream.sh [options] [function] \<query\>
 
-Functions:
+Functions
 ---------
 These functions are exclusive and only one can be used per call. If multiple are
 specified, the script will exit after the first one is enountered and run. Any
@@ -35,10 +35,8 @@ argument immediately following a function will be treated as the query.
 -h  
   Print this help.
 
-Options:
+Options
 -------
-Combining options in a single argument (golfing) is not currently supported.
-
 -c  
   Run the player without the cache options specified in ~/.lstreamrc.
 
@@ -60,4 +58,4 @@ Combining options in a single argument (golfing) is not currently supported.
 -s entry  
   Save the stream url under the name supplied in the following argument.
   This option may be used immediately before the search query, in which case 
-  the entry may be omitted, and the stream will be saved under the query instead."
+  the entry may be omitted, and the stream will be saved under the query instead.

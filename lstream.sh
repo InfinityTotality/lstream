@@ -50,7 +50,6 @@ print_help () {
      Print this help.
 
     Options:
-    Combining options in a single argument (golfing) is not currently supported.
 
     -c
      Run the player with no cache.
