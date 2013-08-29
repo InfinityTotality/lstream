@@ -38,6 +38,7 @@ print_help () {
     callname=`basename "$0"`
     echo "    Usage: 
     $callname [options] [function] <query>
+    $callname [options] -s <query>
 
     Functions:
     These functions are exclusive and only one can be used per call. If multiple are
@@ -276,7 +277,14 @@ shift $((OPTIND - 1))
 # use the argument to -s in case query is omitted
 if [ $# -lt 1 ]
 then
-    query="$entry"
+    # if no more arguments and no entry to use as query, print help and exit 
+    if [ -z "$entry" ]
+    then
+        print_help
+        exit 1
+    else
+        query="$entry"
+    fi
 else
     query="$1"
 fi

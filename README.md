@@ -19,6 +19,7 @@ Depends on:
 Usage
 -----
 lstream.sh [options] [function] \<query\>
+lstream.sh [options] -s \<query\>
 
 Functions
 ---------
@@ -58,4 +59,4 @@ Options
 -s entry  
   Save the stream url under the name supplied in the following argument.
   The query may be omitted when using this option, in which case entry
-  will be used instead.
+  will be used as the query instead.
