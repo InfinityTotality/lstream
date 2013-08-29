@@ -103,9 +103,9 @@ find_stream () {
     twitch_results=0
 
     # search list of saved stream urls if nocache is not specified (by -a or -s)
-    debug 1 "searching stream list for query"
     if [ ! $nocache ]
     then
+        debug 1 "searching stream list for query"
         local cached
         # if a match is found, save as stream and return
         if cached=`grep "^$1|" "$streamlist"`
@@ -114,9 +114,9 @@ find_stream () {
             stream=`echo "$cached" | cut -d'|' -f2`
             return 0
         fi
+        debug 1 "no saved streams found, searching twitch"
     fi
 
-    debug 1 "no saved streams found, searching twitch"
     debug 1 "query: $1"
     debug 1 "twitch limit: $twitch_limit"
 
@@ -169,10 +169,11 @@ find_stream () {
     if [ $twitch_results -eq 1 ]
     then
         stream=${twitch_urls[1]}
-        debug 2 "one result, exiting find_stream"
+        debug 2 "one result found, saving as stream"
     fi
 
     debug 2 "exiting find_stream"
+    return 0
 }
 
 # present results to user and read selection
@@ -226,88 +227,79 @@ else
     write_config
 fi
 
-while [ ! -z "$1" ]
+while getopts 'aceh:l:o:p:q:s:v' OPTION
 do
-    case "$1" in
-        # debug options
-        -v)
-            debuglevel=1
-            shift ;;
-        -vv)
-            debuglevel=2
-            shift ;;
-        -vvv)
-            debuglevel=3
-            shift ;;
+    case "$OPTION" in
         # options
-        -a)
+        a)
             all=true
-            nocache=true
-            shift ;;
-        -e)
-            exact=true
-            shift ;;
-        -c)
-            noplayercache=true
-            shift ;;
-        -o)
-            player="$2"
-            noplayercache=true
-            shift 2 ;;
-        -q)
-            quality="$2"
-            shift 2 ;;
-        -s)
+            nocache=true ;;
+        c)
+            noplayercache=true ;;
+        e)
+            exact=true ;;
+        o)
+            player="$OPTARG"
+            noplayercache=true ;;
+        q)
+            quality="$OPTARG" ;;
+        s)
             save=true
             nocache=true
-            entry="$2"
-            shift 1
-            if [ $# -gt 1 ]
-            then
-                shift 1
-            fi ;;
+            entry="$OPTARG" ;;
+        v)
+            let debuglevel+=1 ;;
         # functions
-        -p)
-            get_stream "$2"
-            echo $stream
-            break ;;
-        -l)
-            get_stream "$2"
-            livestreamer $stream
-            break ;;
-        -h)
+        h)
             print_help 
             break ;;
-        # handle query
-        *)
-            if [ $exact ]
-            then
-                stream="http://www.twitch.tv/$1"
-            else
-                get_stream "$1"
-            fi
-
-            # add entry to stream list if -s is specified
-            if [ $save ]
-            then
-                # check if entry exists and replace if so
-                if grep -q "^$entry|" "$streamlist"
-                then
-                    sed -i "s|^$entry\|.*$|$entry\|$stream|" "$streamlist"
-                    echo "Entry exists, updating"
-                # add new entry otherwise
-                else
-                    echo "$entry|$stream" >> "$streamlist"
-                    echo "Adding entry: $entry $stream"
-                fi
-            fi
-
-            if [ $noplayercache ]
-            then
-                livestreamer -p "$player" -v "$stream" "$quality"
-            else
-                livestreamer -p "$player $cacheopts" -v "$stream" "$quality"
-            fi
+        l)
+            get_stream "$OPTARG"
+            livestreamer $stream
+            break ;;
+        p)
+            get_stream "$OPTARG"
+            echo $stream
             break ;;
     esac
 done
+
+shift $((OPTIND - 1))
+# use the argument to -s in case query is omitted
+if [ $# -lt 1 ]
+then
+    query="$entry"
+else
+    query="$1"
+fi
+
+# handle query
+if [ $exact ]
+then
+    stream="http://www.twitch.tv/$query"
+else
+    get_stream "$query"
+fi
+
+# add entry to stream list if -s is specified
+if [ $save ]
+then
+    # check if entry exists and replace if so
+    if grep -q "^$entry|" "$streamlist"
+    then
+        sed -i "s|^$entry\|.*$|$entry\|$stream|" "$streamlist"
+        echo "Entry exists, updating"
+    # add new entry otherwise
+    else
+        echo "$entry|$stream" >> "$streamlist"
+        echo "Adding entry: $entry $stream"
+    fi
+fi
+
+if [ $noplayercache ]
+then
+    playerstring="$player"
+else
+    playerstring="$player $cacheopts"
+fi
+livestreamer -p "$playerstring" -v "$stream" "$quality"
