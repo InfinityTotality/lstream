@@ -27,39 +27,39 @@ These functions are exclusive and only one can be used per call. If multiple are
 specified, the script will exit after the first one is enountered and run. Any
 argument immediately following a function will be treated as the query.
 
--d entry
+-d entry  
 Delete stream saved under name \"entry\"
 
--h
+-h  
 Print this help
 
--l
+-l  
 List the available stream qualities for the selected stream
 
--p
+-p  
 Print the stream url which would normally be passed to livestreamer
 
 Options
 -------
--a
+-a  
 Ignore saved streams and search for the query normally
 
--c
+-c  
 Run the player without the cache options specified in ~/.lstreamrc
 
--e
+-e  
 Will use the query as the exact stream name, i.e. twitch.tv/<query>
 
--o player
+-o player  
 Player specification. Will use the following single argument as the player string.
 
--q quality
+-q quality  
 Use the specified quality for the stream. (use -l for a list of available qualities)
 
--s entry
+-s entry  
 Save the stream url under the name supplied in the following argument.
 The query may be omitted when using this option, in which case \"entry\"
 will be used instead
 
--v / -vv / -vvv
+-v / -vv / -vvv  
 Run with specified level of extra debug output
