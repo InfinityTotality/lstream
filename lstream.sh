@@ -200,8 +200,10 @@ print_results () {
     fi
     echo -n "Enter your selection: "
     read choice
+    debug 2 "choice:"
+    debug 2 "$choice"
     # make sure choice is 1 or more digits, exit otherwise
-    if [[ ! "$choice" =~ [0-9]+ ]] 
+    if [[ ! "$choice" =~ ^[0-9]+$ ]] 
     then
         exit 0
     elif [ $choice -gt $twitch_results ] || [ $choice -lt 1 ]
