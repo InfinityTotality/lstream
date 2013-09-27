@@ -18,7 +18,7 @@ Depends on:
 
 Usage
 -----
-lstream.sh [options] [function] \<query\>
+lstream.sh [options] [function] \<query\>  
 lstream.sh [options] -s \<query\>
 
 Functions

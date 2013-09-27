@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # API stream list seems to only support returning 100 at a time, and this seems sufficient for popular streams
 twitch_limit=100
@@ -200,8 +200,7 @@ print_results () {
     fi
     echo -n "Enter your selection: "
     read choice
-    debug 2 "choice:"
-    debug 2 "$choice"
+    debug 2 "choice: $choice"
     # make sure choice is 1 or more digits, exit otherwise
     if [[ ! "$choice" =~ ^[0-9]+$ ]] 
     then
@@ -257,7 +256,7 @@ do
             nocache=true
             entry="$OPTARG" ;;
         v)
-            let debuglevel+=1 ;;
+            let debuglevel++ ;;
         # functions
         d)
             if grep -q "^$OPTARG|.*" "$streamlist"
